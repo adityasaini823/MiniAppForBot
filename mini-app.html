@@ -14,6 +14,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const uuid = urlParams.get('uuid');
       if (!uuid) {
+         console.log("uuid");
         alert('Invalid request: Missing UUID.');
         return;
       }
@@ -22,12 +23,15 @@
         const data = await response.json();
         const channelUsername=data.originalLink.split("https://t.me/")[1];
         if (channelUsername) {
+           console.log(channelUsername);
           window.location.href = `tg://resolve?domain=${channelUsername}`;
           tg.close();
         } else {
+           console.log('Invalid or expired link');
           alert('Invalid or expired link');
         }
       } catch (error) {
+        console.log(error);
         alert('Error processing your request');
       }
     }
