@@ -6,6 +6,7 @@
 </head>
 <body>
   Redirecting....
+  <h2 id="error"></h2>
   <script>
     const API_URL = "https://urlencrypterbot.onrender.com";
     const tg = window.Telegram.WebApp;
@@ -25,9 +26,10 @@
         const channelUsername=data.originalLink;
         if (channelUsername) {
            console.log(channelUsername);
-          window.location.href = `${channelUsername}`;
+          tg.openLink(channelUsername);
           tg.close();
         } else {
+          document.getElementById('redirection failed');
            console.log('Invalid or expired link');
           alert('Invalid or expired link');
         }
