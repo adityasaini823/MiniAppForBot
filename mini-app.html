@@ -25,7 +25,7 @@
         const channelUsername=data.originalLink;
         if (channelUsername) {
            console.log(channelUsername);
-          window.location.href = `tg://resolve?domain=${channelUsername}`;
+          window.location.href = `${channelUsername}`;
           tg.close();
         } else {
            console.log('Invalid or expired link');
