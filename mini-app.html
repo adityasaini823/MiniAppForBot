@@ -22,11 +22,19 @@
       try {
         const response = await fetch(`${API_URL}/api/resolve?uuid=${uuid}`);
         const data = await response.json();
-        // const channelUsername=data.originalLink.split("https://t.me/")[1];
-        const channelUsername=data.originalLink;
+        const channelUsername = data.originalLink.replace("https://t.me/", "").replace("@", "").trim();
+        const telegramDeepLink = `tg://resolve?domain=${channelUsername}`;
+        const telegramWebLink = `https://t.me/${channelUsername}`;
         if (channelUsername) {
-           console.log(channelUsername);
-          tg.openLink(channelUsername);
+          setTimeout(() => {
+            // First try the Telegram deep link
+            tg.openLink(telegramDeepLink);
+
+            // If deep link fails, use the web link
+            setTimeout(() => {
+              tg.openLink(telegramWebLink);
+            }, 1000);
+          }, 100);
           tg.close();
         } else {
           document.getElementById('redirection failed');
