@@ -21,7 +21,8 @@
       try {
         const response = await fetch(`${API_URL}/api/resolve?uuid=${uuid}`);
         const data = await response.json();
-        const channelUsername=data.originalLink.split("https://t.me/")[1];
+        // const channelUsername=data.originalLink.split("https://t.me/")[1];
+        const channelUsername=data.originalLink;
         if (channelUsername) {
            console.log(channelUsername);
           window.location.href = `tg://resolve?domain=${channelUsername}`;
