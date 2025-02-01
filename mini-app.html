@@ -8,26 +8,47 @@
 <body>
   Redirecting....
   <h2 id="error"></h2>
- <script> document.addEventListener("DOMContentLoaded", async () => {
-  const webApp = window.Telegram.WebApp;
-  webApp.ready();
-  webApp.expand();
-  const initData = webApp.initDataUnsafe;
-  const startParam = initData.start_param;
-  const chatType = initData.chat_type;
-  const isCompact = !webApp.isExpanded;
-  try{
-      const uuid=startParam;
-      const response= await axios.get(`https://urlencrypterbot.onrender.com/api/resolve?uuid=${uuid}`);
-      const data=response.data;
-      if(data){
-          // document.getElementById("test-data").innerHTML = JSON.stringify({data});
-          webApp.openTelegramLink(data.originalLink);
-          webApp.close()
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const webApp = window.Telegram.WebApp;
+      webApp.ready();
+      webApp.expand();
+      
+      const user = Telegram.WebApp.initDataUnsafe.user;
+      const startParam = webApp.initDataUnsafe.start_param;
+      const uuid = startParam;
+
+      // Request payload (body data)
+      const postData = {
+        uuid: uuid,
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name || '',
+        username: user.username || '',
+        language_code: user.language_code || ''
+      };
+
+      try {
+        // Send POST request with JSON body
+        const response = await axios.post(
+          'https://urlencrypterbot.onrender.com/api/resolve',
+          postData,
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.data) {
+          webApp.openTelegramLink(response.data.originalLink);
+          webApp.close();
+        }
+      } catch (err) {
+        alert("Failed to redirect. Please try again later.");
+        console.error('API Error:', err);
       }
-  }catch(err){
-      alert("Failed to redirect.Please try again in some time");
-  }
-});</script>
+    });
+  </script>
 </body>
 </html>
