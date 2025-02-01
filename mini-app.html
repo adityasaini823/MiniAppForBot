@@ -3,42 +3,31 @@
 <head>
   <title>Secure Link Redirect</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
   Redirecting....
   <h2 id="error"></h2>
-  <script>
-    const API_URL = "https://urlencrypterbot.onrender.com";
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    async function redirect() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const uuid = urlParams.get('uuid');
-      if (!uuid) {
-         console.log("uuid");
-        alert('Invalid request: Missing UUID.');
-        return;
+ <script> document.addEventListener("DOMContentLoaded", async () => {
+  const webApp = window.Telegram.WebApp;
+  webApp.ready();
+  webApp.expand();
+  const initData = webApp.initDataUnsafe;
+  const startParam = initData.start_param;
+  const chatType = initData.chat_type;
+  const isCompact = !webApp.isExpanded;
+  try{
+      const uuid=startParam;
+      const response= await axios.get(`https://urlencrypterbot.onrender.com/api/resolve?uuid=${uuid}`);
+      const data=response.data;
+      if(data){
+          // document.getElementById("test-data").innerHTML = JSON.stringify({data});
+          webApp.openTelegramLink(data.originalLink);
+          webApp.close()
       }
-      try {
-        const response = await fetch(`${API_URL}/api/resolve?uuid=${uuid}`);
-        const data = await response.json();
-        // const channelUsername=data.originalLink.split("https://t.me/")[1];
-        const channelUsername=data.originalLink;
-        if (channelUsername) {
-           console.log(channelUsername);
-          tg.openTelegramLink(channelUsername);
-          tg.close();
-        } else {
-          document.getElementById('redirection failed');
-           console.log('Invalid or expired link');
-          alert('Invalid or expired link');
-        }
-      } catch (error) {
-        console.log(error);
-        alert('Error processing your request');
-      }
-    }
-    redirect();
-  </script>
+  }catch(err){
+      alert("Failed to redirect.Please try again in some time");
+  }
+});</script>
 </body>
 </html>
