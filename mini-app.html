@@ -4,30 +4,59 @@
   <title>Secure Link Redirect</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    #debug {
+      background-color: #fefefe;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    #error {
+      color: red;
+    }
+  </style>
 </head>
 <body>
-  Redirecting....
+  <div id="debug">Debug output will appear here:</div>
   <h2 id="error"></h2>
   <script>
+    // Utility function to append debug messages to the #debug div
+    function debugLog(message) {
+      const debugDiv = document.getElementById('debug');
+      debugDiv.innerHTML += '\n' + message;
+    }
+
     document.addEventListener("DOMContentLoaded", async () => {
       const webApp = window.Telegram.WebApp;
       webApp.ready();
       webApp.expand();
+
+      // Check if Telegram data is available
+      if (!Telegram.WebApp.initDataUnsafe || !Telegram.WebApp.initDataUnsafe.user) {
+        debugLog("Telegram WebApp data not available");
+        document.getElementById("error").innerText = "Telegram data not available.";
+        return;
+      }
       
       const user = Telegram.WebApp.initDataUnsafe.user;
       const startParam = webApp.initDataUnsafe.start_param;
-      const uuid = startParam;
+      const uuid = startParam; // Using start_param as uuid
 
-      // Request payload (body data)
+      // Create payload object
       const postData = {
         uuid: uuid,
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name || '',
         username: user.username || '',
-        language_code: user.language_code || ''
       };
 
+      debugLog("Payload being sent: " + JSON.stringify(postData, null, 2));
+      
       try {
         // Send POST request with JSON body
         const response = await axios.post(
@@ -40,13 +69,23 @@
           }
         );
 
-        if (response.data) {
+        debugLog("Response received: " + JSON.stringify(response.data, null, 2));
+
+        // Check if the response contains an originalLink
+        if (response.data && response.data.originalLink) {
           webApp.openTelegramLink(response.data.originalLink);
           webApp.close();
+        } else {
+          document.getElementById("error").innerText = "Invalid response from server.";
+          debugLog("Invalid response: Missing originalLink");
         }
       } catch (err) {
-        alert("Failed to redirect. Please try again later.");
-        console.error('API Error:', err);
+        // Log error details into the debug div
+        const errMsg = err.response 
+          ? JSON.stringify(err.response.data, null, 2)
+          : err.toString();
+        debugLog("API Error: " + errMsg);
+        document.getElementById("error").innerText = "Failed to redirect. Please try again later.";
       }
     });
   </script>
