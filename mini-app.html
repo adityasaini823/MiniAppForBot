@@ -13,7 +13,6 @@
     document.addEventListener("DOMContentLoaded", async () => {
       const webApp = window.Telegram.WebApp;
       webApp.ready();
-      webApp.expand();
 
       // Check if Telegram data is available
       if (!Telegram.WebApp.initDataUnsafe || !Telegram.WebApp.initDataUnsafe.user) {
