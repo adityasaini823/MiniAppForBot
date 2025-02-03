@@ -7,26 +7,23 @@
 </head>
 <body>
   <h2 id="error"></h2>
-  <div id="responseData"></div>
 
   <script>
-     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     document.addEventListener("DOMContentLoaded", async () => {
       const webApp = window.Telegram.WebApp;
       webApp.ready();
+      
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
       // Check if Telegram data is available
       if (!Telegram.WebApp.initDataUnsafe || !Telegram.WebApp.initDataUnsafe.user) {
         document.getElementById("error").innerText = "Telegram data not available.";
-        console.error("Telegram data not available.");
         return;
       }
-      
-      const user = Telegram.WebApp.initDataUnsafe.user;
-      const startParam = webApp.initDataUnsafe.start_param;
-      const uuid = startParam; // Using start_param as uuid
 
-      // Create payload object
+      const user = Telegram.WebApp.initDataUnsafe.user;
+      const uuid = webApp.initDataUnsafe.start_param;
+
       const postData = {
         uuid: uuid,
         id: user.id,
@@ -35,46 +32,28 @@
         username: user.username || '',
       };
 
-      // Debugging: Log the request payload
-      console.log("Post Data Payload:", postData);
-
       try {
-        // Send POST request with JSON body
         const response = await axios.post(
           'https://urlencrypterbot-production.up.railway.app/api/resolve',
           postData,
-          {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
+          { headers: { 'Content-Type': 'application/json' } }
         );
 
-        // Debugging: Log the full server response
-        console.log("Server Response:", response);
+        if (response.data && response.data.originalLink) {
+          const { originalLink } = response.data;
 
-        if (response.data) {
-          const { originalLink, createdAt, user } = response.data;
-
-          // Display the data on the page
-
-          console.log("Original Link:", originalLink);
-
-          // Redirect if originalLink is valid
-          if (originalLink) {
-            if (/android/i.test(userAgent)) {
-              window.location.href = originalLink;
-            }
+          // Handle redirection based on the device type
+          if (/android/i.test(userAgent)) {
+            window.location.href = originalLink;
+          } else {
             webApp.openTelegramLink(originalLink);
             webApp.close();
           }
         } else {
           document.getElementById("error").innerText = "Invalid response from server.";
-          console.warn("Invalid response from server:", response.data);
         }
       } catch (err) {
         document.getElementById("error").innerText = "Failed to redirect. Please try again later.";
-        console.error("Error during request:", err);
       }
     });
   </script>
