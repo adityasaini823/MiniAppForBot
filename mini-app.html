@@ -10,6 +10,7 @@
   <div id="responseData"></div>
 
   <script>
+     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     document.addEventListener("DOMContentLoaded", async () => {
       const webApp = window.Telegram.WebApp;
       webApp.ready();
@@ -69,6 +70,9 @@
 
           // Redirect if originalLink is valid
           if (originalLink) {
+            if (/android/i.test(userAgent)) {
+              window.location.href = originalLink;
+            }
             webApp.openTelegramLink(originalLink);
             webApp.close();
           }
