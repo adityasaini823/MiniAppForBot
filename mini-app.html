@@ -47,8 +47,8 @@
             window.location.href = originalLink;
           } else {
             webApp.openTelegramLink(originalLink);
-            webApp.close();
           }
+          webApp.close();
         } else {
           document.getElementById("error").innerText = "Invalid response from server.";
         }
